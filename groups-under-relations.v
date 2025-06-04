@@ -1559,7 +1559,7 @@ Instance quotient_to_image_is_aut {G G' : Type} {R : G -> G -> Prop} {R' : G' ->
 
 
 
-Theorem first_iso_theorm {G G' : Type} {R : G -> G -> Prop} {R' : G' -> G' -> Prop} (h : G -> G') `{GrpHom G G' R R' h}
+Theorem first_iso_theorem {G G' : Type} {R : G -> G -> Prop} {R' : G' -> G' -> Prop} (h : G -> G') `{GrpHom G G' R R' h}
 
   : let h' := restrict_cod h in
     let K  := hom_equiv R h  in
