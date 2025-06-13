@@ -2809,26 +2809,26 @@ Qed.
 
 Lemma pass_reduce {n : nat} 
 
-  : forall (m : nat) (xs : FreeGroup n) {g h : Generators n},
+  : forall (m : nat) (xs : FreeGroup n) {g : Generators n},
       let E := strong_free_equiv in
 
-          E (reduce (S m) (fcon g (fcon h xs))) (reduce1 (fcon g (reduce m (fcon h xs)))).
+          E (reduce (S m) (fcon g xs)) (reduce1 (fcon g (reduce m xs))).
 
 Proof.
   induction m.
-  - intros xs g h E.
+  - intros xs g E.
     unfold reduce, repeat, fun_id.
     exact (refl _).
-  - intros xs g h E.
+  - intros xs g E.
     unfold reduce at 1.
     rewrite repeat_on_right.
     fold (@reduce n (S m)).
-    set (IHm' := IHm xs g h).
+    set (IHm' := IHm xs g).
     apply (trans (reduce1_well_def IHm')).
     unfold reduce at 2.
     rewrite repeat_on_right.
     fold (@reduce n m).
-    set (ys := reduce m (fcon h xs)).
+    set (ys := reduce m xs).
     destruct ys.
     + simpl.
       split.
@@ -2857,7 +2857,6 @@ Proof.
             exact (unique_inverse_gen (is_inverse_gen_swap inv2) inv1).
             exact (refl _).
 Qed.
-
 
 
 Lemma children_are_really_normal {n : nat}
@@ -2895,7 +2894,7 @@ Proof.
           rewrite (reduce_normal_is_id (S m) norm_sng).
           exact norm_sng.
         -- repeat fold (@fcon n) in *.
-          set (pass := @pass_reduce n m xs g0 g1).
+          set (pass := @pass_reduce n m (fcon g1 xs) g0).
           exact (normalized_respects_strong_free_equiv (sym pass) ext).
 Qed.
 
@@ -2919,7 +2918,7 @@ Proof.
       exact norm_sng.
     + set (inv_dec := is_inverse_gen_is_decidable g g0).
       destruct inv_dec as [ninv | inv].
-      * apply (normalized_respects_strong_free_equiv (sym $ pass_reduce m g1)).
+      * apply (normalized_respects_strong_free_equiv (sym $ pass_reduce m _)).
         fold (@fcon n) in *.
         set (ys := reduce m (fcon g0 g1)).
         fold ys in norm.
@@ -3255,7 +3254,7 @@ Proof.
       unfold normalize.
       rewrite word_length_s.
       fold (@fcon n) in *.
-      apply (rtrans $ sym (@pass_reduce n (word_length (fcon g0 w')) w' g' g0)).
+      apply (rtrans $ sym (@pass_reduce n (word_length (fcon g0 w')) (fcon g0 w') g')).
       fold (normalize (fcon g0 w')).
       set (nw := normalize (fcon g0 w')).
       fold nw in fe.
@@ -3270,7 +3269,7 @@ Proof.
       rewrite (normalize_normal_is_id _ fid_is_normal) in fe.
       unfold normalize.
       rewrite word_length_s.
-      apply (trans (@pass_reduce n (word_length (fcon g0 w)) w g g0)).
+      apply (trans (@pass_reduce n (word_length (fcon g0 w)) (fcon g0 w) g)).
       fold (normalize (fcon g0 w)).
       set (nw := normalize (fcon g0 w)).
       fold nw in fe.
@@ -3280,11 +3279,11 @@ Proof.
     + intros G F ge fe.
       unfold F, free_equiv, normalize.
       rewrite word_length_s.
-      fold (@fcon n). 
-      apply (trans (@pass_reduce n (word_length (fcon g0 w)) w g g0)).
+      fold (@fcon n).
+      apply (trans (@pass_reduce n (word_length (fcon g0 w)) (fcon g0 w) g)).
       fold (normalize (fcon g0 w)).
       rewrite word_length_s.
-      apply (rtrans $ sym $ @pass_reduce n (word_length (fcon g1 w')) w' g' g1).
+      apply (rtrans $ sym $ @pass_reduce n (word_length (fcon g1 w')) (fcon g1 w') g').
       fold (normalize (fcon g1 w')).
       unfold F, free_equiv in fe.
       destruct (@free_con_respects_strong_free_equiv n g g' (normalize (fcon g0 w)) (normalize (fcon g1 w')) ge) as (f & _).
@@ -3328,91 +3327,6 @@ Proof.
     unfold app.
     exact (free_con_well_def_on_free_equiv (refl g) IHg).
 Qed.
-
-About pass_reduce.
-
-Lemma normalize_sub {n : nat}
-
-  : forall {g h : FreeGroup n},
-
-      free_equiv (free_mult g h) (free_mult (normalize g) (normalize h)).
-
-Proof.
-  induction g.
-  - intro h.
-    simpl.
-    unfold free_equiv.
-    rewrite (normalize_normal_is_id _ (normal_is_normalized h)).
-    exact (refl _).
-  - intro h.
-    set (IHg' := IHg h).
-    set (free_con_well_def_on_free_equiv (refl g) IHg').
-    unfold free_mult at 1.
-    fold (free_mult g0 h).
-    apply (trans f).
-    unfold free_equiv.
-    unfold normalize at 1.
-    rewrite word_length_s.
-    set (m := word_length (free_mult (normalize g0) (normalize h))).
-    set (w := free_mult (normalize g0) (normalize h)).
-    set (pass := pass_reduce m w).
-
-
-
-Lemma free_mult_eq_id {n : nat}
-
-  : forall {g h : FreeGroup n},
-
-      free_equiv fid g -> free_equiv fid h -> free_equiv fid (free_mult g h).
-
-Proof.
-  destruct g, h.
-  - simpl; trivial.
-  - simpl; trivial.
-  - intros e1 e2.
-    apply (rtrans $ sym $ free_mult_right_id _).
-    exact e1.
-  - intros e1 e2.
-    unfold free_equiv in *.
-    repeat rewrite (normalize_normal_is_id _ fid_is_normal) in *.
-    fold (@fid n); fold (@fcon n). 
-
-
-
-Lemma free_mult_well_def {n : nat}
-
-  : forall {g g' h h' : FreeGroup n},
-
-      free_equiv g g' -> free_equiv h h' -> free_equiv (free_mult g h) (free_mult g' h').
-
-Proof.
-  induction g.
-  - destruct g'.
-    + simpl. trivial.
-    + induction h.
-      * destruct h'.
-        -- simpl; unfold app.
-          intros e1 e2.
-          set (free_mult_right_id g').
-          apply (rtrans $ sym $ free_con_well_def_on_free_equiv (refl g) f).
-          exact e1.
-        -- intros e1 e2.
-          simpl; unfold app.
-          set (g0h' := fcon g0 h').
-          fold (@fcon n) in *; fold g0h'; fold g0h' in e2.
-          destruct g0h'.
-          ++ set (free_mult_right_id g').
-            apply (rtrans $ sym $ free_con_well_def_on_free_equiv (refl g) f).
-            apply (rtrans e1).
-            exact e2.
-          ++ assert (free_mult (fcon g g') (fcon g1 g0h') = fcon g (free_mult g' (fcon g1 g0h'))).
-            simpl; unfold app.
-            reflexivity.
-            apply (rtrans $ lift_eq H).
-            
-
-
-
 
 
 
