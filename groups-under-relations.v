@@ -1,12 +1,13 @@
 
+
 (*==============================================================================*)
 (* Utility                                                                      *)
 (*==============================================================================*)
 
 Definition app {A : Type} {B : A -> Type} (f : forall x : A, B x) (a : A) := f a.
 
-Notation "f @ a" := (app f a) (at level 101, left associativity).
-Notation "f $ a" := (app f a) (at level 102, right associativity).
+Notation "f @ a" := (app f a) (at level 101, left associativity, only parsing).
+Notation "f $ a" := (app f a) (at level 102, right associativity, only parsing).
 
 
 
@@ -26,11 +27,7 @@ Definition fun_id {A : Type} : A -> A := fun a => a.
 
 
 
-Fixpoint repeat {A : Type} (f : A -> A) (n : nat)
-
-  : A -> A
-
-:=
+Fixpoint repeat {A : Type} (f : A -> A) (n : nat) : A -> A :=
   match n with
   | 0    => fun_id
   | S n' => fun x => repeat f n' (f x)
@@ -44,15 +41,10 @@ Lemma repeat_on_right {A : Type} (f : A -> A) (n : nat)
 
 Proof.
   induction n.
-  - intro x.
-    simpl; unfold fun_id.
+  - simpl; unfold fun_id.
     reflexivity.
-  - intro x.
-    simpl.
-    set (IHn (f x)).
-    unfold repeat in e.
-    fold (repeat f n) in e.
-    exact e.
+  - simpl.
+    exact (fun x => IHn (f x)).
 Qed.
 
 
@@ -62,22 +54,17 @@ Lemma repeat_on_left {A : Type} (f : A -> A) (n : nat)
   : forall (x : A), repeat f (S n) x = repeat f n (f x).
 
 Proof.
-  destruct n.
-  - intro x.
-    simpl; reflexivity.
-  - intro x.
-    unfold repeat.
-    fold (repeat f n).
-    reflexivity.
+  auto.
 Qed.
 
 
 
-Definition neg (b : bool) :=
-  match b with
-  | true  => false
-  | false => true
-  end.
+Definition neg : bool -> bool :=
+  fun b => 
+    match b with
+    | true  => false
+    | false => true
+    end.
 
 
 
@@ -99,7 +86,7 @@ Qed.
 
 
 
-Fixpoint nat_eq (n m : nat) : bool := 
+Fixpoint nat_eq (n m : nat) : bool :=
   match n, m with
   | 0,   0     => true
   | 0,   S _   => false
@@ -131,34 +118,23 @@ Proof.
   induction n.
   intro m.
   - split.
-    + destruct m.
+    + destruct m; trivial.
+      discriminate.
+    + intro e; rewrite (eq_sym e).
       trivial.
-      simpl.
-      intro.
-      discriminate H.
-    + intro.
-      induction H.
-      trivial.
-  - intro.
-    split.
+  - intro m; split.
     + destruct m.
-      intro.
-      simpl in H.
-      discriminate H.
-      simpl.
-      intro.
-      apply (f_equal S).
-      destruct (IHn m).
-      exact (H0 H).
+      * discriminate.
+      * simpl; intro e.
+        apply f_equal.
+        destruct (IHn m) as (forward & _).
+        exact (forward e).
     + destruct m.
-      intro.
-      discriminate H.
-      intro.
-      simpl.
-      injection H.
-      intro.
-      induction H0.
-      exact (nat_eq_refl n).
+      * discriminate.
+      * simpl; intro e.
+        injection e; intro e'.
+        rewrite e'.
+        exact (nat_eq_refl m).
 Qed.
 
 
@@ -169,48 +145,145 @@ Lemma nat_eq_reflect_false
 
 Proof.
   intros n m.
-  set (reflect := nat_eq_reflect n m).
+  destruct (nat_eq_reflect n m) as (reflect_f & reflect_b).
   split.
   - unfold "<>".
     intros a b.
-    destruct reflect.
-    set (H0 b).
-    apply eq_sym in e.
-    set (eq_trans e a).
-    discriminate e0.
+    rewrite a in reflect_b.
+    discriminate (reflect_b b).
   - unfold "<>".
-    intro.
-    destruct reflect.
-    set (fun x => H (H0 x)).
+    intro z.
     induction (nat_eq n m).
-    * exfalso.
-      exact (f eq_refl).
-    * reflexivity.
+    + exfalso; exact (z $ reflect_f $ eq_refl _).
+    + reflexivity.
 Qed.
 
 
 
 Lemma none_less_than_zero
 
-  : forall (n : nat), ~(n < 0).
+  : forall {n : nat}, ~(n < 0).
 
 Proof.
-  red in |-*.
-  intros.
-  unfold "<" in H.
+  red in |-*; intros n e.
+  unfold "<" in e.
   assert (exists k, 0 = S k).
-  elim H.
+  elim e.
   - exists n.
     reflexivity.
-  - intros m l e.
-    destruct e.
+  - intros m l p.
+    destruct p as (x & q).
     exists (S x).
-    induction H0.
-    reflexivity.
-  - destruct H0.
-    discriminate H0.
+    rewrite q; reflexivity.
+  - destruct H.
+    discriminate H.
 Qed.
 
+
+
+Lemma reduce_succ_lt
+
+  : forall {n m : nat}, S n < S m -> n < m.
+
+Proof.
+  red in |-*; intros n m e.
+  unfold "<" in e.
+  inversion e.
+  - exact (le_n (S n)).
+  - set (le_S _ _ (le_n (S n))).
+    elim H0.
+    + exact l.
+    + intros m' e1 e2.
+      exact (le_S _ _ e2).
+Qed.
+
+
+
+Lemma apply_succ_lt
+
+  : forall {n m : nat}, n < m -> S n < S m.
+
+Proof.
+  red in |-*; intros n m e.
+  unfold "<" in e.
+  inversion e.
+  - exact (le_n (S (S n))).
+  - elim H.
+    + exact (le_S _ _ (le_n (S (S n)))).
+    + intros m' e1 e2.
+      exact (le_S _ _ e2).
+Qed.
+
+
+
+Lemma none_less_than_itself
+
+  : forall {n : nat}, ~(n < n).
+
+Proof.
+  red in |-*; intros n e.
+  induction n.
+  - exact (none_less_than_zero e).
+  - apply reduce_succ_lt in e.
+    exact (IHn e).
+Qed.
+
+
+
+Lemma lt_trans
+
+  : forall {n m k : nat}, n < m -> m < k -> n < k.
+
+Proof.
+  intros n m k e1 e2.
+  elim e2.
+  - exact (le_S _ _ e1).
+  - intros m' e3 e4.
+    exact (le_S _ _ e4).
+Qed.
+
+
+
+Lemma none_less_and_greater
+
+  : forall {n m : nat}, (n < m) -> (m < n) -> False.
+
+Proof.
+  intros n m e e'.
+  exact (none_less_than_itself (lt_trans e e')).
+Qed.
+
+
+
+Lemma split_le
+
+  : forall {n m : nat}, n <= m -> (n < m \/ n = m).
+
+Proof.
+  intros.
+  elim H.
+  - right; reflexivity.
+  - intros m' e' h.
+    destruct h as [l | r].
+    + left.
+      apply apply_succ_lt in l.
+      apply (fun z => lt_trans z l).
+      exact (le_n (S n)).
+    + left; rewrite r.
+      exact (le_n (S m')).
+Qed.
+
+
+
+Lemma intro_lt
+
+  : forall {n m : nat}, S n = m -> n < m.
+
+Proof.
+  intros n m e; unfold "<".
+  rewrite e.
+  exact (le_n _).
+Qed.
 
 
 
@@ -226,6 +299,8 @@ Class Equiv {A : Type} (R : A -> A -> Prop) :=
   trans : forall {x y z : A}, R x y -> R y z -> R x z;
 
   rtrans := fun {x y z : A} (p : R y z) (q : R x y) => trans q p;
+
+  lift_eq : forall {x y : A}, (x = y) -> R x y := fun x y => eq_ind x (fun z => R x z) (refl x) y;
 }.
 
 
@@ -1806,10 +1881,9 @@ Lemma no_zero_generators :
   Generators 0 -> False.
 
 Proof.
-  intro.
-  destruct H.
-  exact (none_less_than_zero k l).
-  exact (none_less_than_zero k l).
+  intro g; destruct g.
+  - exact (none_less_than_zero l).
+  - exact (none_less_than_zero l).
 Qed.
 
 
@@ -1849,18 +1923,11 @@ Lemma gen_equiv_production {n : nat}
       k = k' -> (gen_equiv n (gen n k l) (gen n k' l')) /\ (gen_equiv n (inv_gen n k l) (inv_gen n k' l')).
 
 Proof.
-  intros.
-  induction H.
+  intros k k' l l' e.
+  induction e.
   induction n.
-  - simpl.
-    unfold gen_equiv_0.
-    split.
-    trivial.
-    trivial.
-  - simpl.
-    split.
-    trivial.
-    trivial.
+  - simpl; unfold gen_equiv_0; auto.
+  - simpl; auto.
 Qed.
 
 
@@ -1892,10 +1959,9 @@ Lemma gen_equiv_fails_on_inv {n : nat}
 Proof.
   induction n.
   - intros k k' l l' eqv.
-    exact (none_less_than_zero _ l).
+    exact (none_less_than_zero l).
   - intros k k' l l' eqv.
-    simpl in eqv.
-    exact eqv.
+    simpl in eqv; exact eqv.
 Qed.
 
 
@@ -1906,13 +1972,10 @@ Lemma gen_equiv_refl (n : nat) (x : Generators n)
 
 Proof.
   induction n.
-  - simpl; unfold gen_equiv_0.
-    trivial.
+  - simpl; unfold gen_equiv_0; trivial.
   - induction x.
-    * simpl.
-      trivial.
-    * simpl.
-      trivial.
+    * simpl; trivial.
+    * simpl; trivial.
 Qed.
 
 
@@ -1923,13 +1986,9 @@ Lemma gen_equiv_sym (n : nat) (x y : Generators n)
 
 Proof.
   induction n.
-  - simpl; unfold gen_equiv_0.
-    trivial.
+  - simpl; unfold gen_equiv_0; trivial.
   - induction x, y; simpl in *.
-    * intro p; exact (eq_sym p).
-    * trivial.
-    * trivial.
-    * intro p; exact (eq_sym p).
+    auto. auto. auto. auto.
 Qed.
 
 
@@ -1940,8 +1999,7 @@ Lemma gen_equiv_trans (n : nat) (x y z : Generators n)
 
 Proof.
   induction n.
-  - simpl; unfold gen_equiv_0.
-    trivial.
+  - simpl; unfold gen_equiv_0; trivial.
   - induction x, y, z; simpl in *.
     * intros p q; exact (eq_trans p q).
     * trivial.
@@ -1989,14 +2047,10 @@ Lemma is_inverse_gen_swap {n : nat}
 Proof.
   intros g h inv.
   destruct g, h.
-  - simpl in *.
-    exact inv.
-  - simpl in *.
-    symmetry; exact inv.
-  - simpl in *.
-    symmetry; exact inv.
-  - simpl in *.
-    exact inv.
+  - simpl in *. exact inv.
+  - simpl in *. symmetry; exact inv.
+  - simpl in *. symmetry; exact inv.
+  - simpl in *. exact inv.
 Qed.
 
 
@@ -2006,17 +2060,12 @@ Lemma is_inverse_gen_is_decidable {n : nat}
   : forall (g h : Generators n), ~(is_inverse_gen g h) \/ (is_inverse_gen g h).
 
 Proof.
-  induction g.
-  destruct h.
-  - simpl.
-    left; exact fun_id.
-  - simpl.
-    exact (nat_peq_is_decidable k k0).
+  induction g. destruct h.
+  - simpl. auto.
+  - simpl. exact (nat_peq_is_decidable k k0).
   - destruct h.
-    + simpl.
-      exact (nat_peq_is_decidable k k0).
-    + left; simpl.
-      exact fun_id.
+    + simpl. exact (nat_peq_is_decidable k k0).
+    + simpl. auto.
 Qed.
 
 
@@ -2055,30 +2104,24 @@ Lemma unique_inverse_gen {n : nat}
 Proof.
   intros g h g' inv1 inv2.
   destruct g, h.
-  - simpl in inv1.
-    exfalso; exact inv1.
+  - simpl in inv1. exfalso; exact inv1.
   - simpl in inv1.
     induction inv1.
     destruct g'.
     + simpl in inv2.
       induction inv2.
-      set (gen_equiv_production k0 k0 l l1 eq_refl).
-      destruct a.
-      exact H.
-    + simpl in inv2.
-      exfalso; exact inv2.
+      set (prod := gen_equiv_production k0 k0 l l1 eq_refl).
+      exact (proj1 prod).
+    + simpl in inv2. exfalso; exact inv2.
   - simpl in inv1.
     induction inv1.
     destruct g'.
-    + simpl in inv2.
-      exfalso; exact inv2.
+    + simpl in inv2. exfalso; exact inv2.
     + simpl in inv2.
       induction inv2.
-      set (gen_equiv_production k0 k0 l l1 eq_refl).
-      destruct a.
-      exact H0.
-  - simpl in inv1.
-    exfalso; exact inv1.
+      set (prod := gen_equiv_production k0 k0 l l1 eq_refl).
+      exact (proj2 prod).
+  - simpl in inv1. exfalso; exact inv1.
 Qed.
 
 
@@ -2095,24 +2138,18 @@ Proof.
   - simpl in *. exact inv.
   - simpl in *.
     apply gen_equiv_reduction in eqv; simpl in eqv.
-    transitivity k.
-    symmetry; exact eqv.
-    exact inv.
+    transitivity k. symmetry; exact eqv. exact inv.
   - simpl in *. exfalso; exact inv.
-  - simpl in *.
-    exact (gen_equiv_fails_on_inv _ _ _ _ eqv).
-  - simpl in *.
-    exact (gen_equiv_fails_on_inv _ _ _ _ (sym eqv)).
-  - simpl in *.
-    exfalso; exact inv.
+  - simpl in *. exact (gen_equiv_fails_on_inv _ _ _ _ eqv).
+  - simpl in *. exact (gen_equiv_fails_on_inv _ _ _ _ (sym eqv)).
+  - simpl in *. exfalso; exact inv.
   - simpl in *.
     apply gen_equiv_reduction in eqv; simpl in eqv.
     transitivity k.
-    symmetry; exact eqv.
-    exact inv.
-  - simpl in *.
-    exact inv.
+    symmetry; exact eqv. exact inv.
+  - simpl in *. exact inv.
 Qed.
+
 
 
 
@@ -2153,6 +2190,40 @@ Definition singleton {n : nat}
 
 :=
   fun g => fcon g fid.
+
+
+
+Definition word_length {n : nat}
+
+  : FreeGroup n -> nat
+
+:=
+  fix len g :=
+    match g with
+    | free_id _ => 0
+    | free_con _ _ xs => S (len xs)
+    end.
+
+
+
+Corollary singleton_has_length_1 {n : nat}
+
+  : forall (g : Generators n), word_length (singleton g) = 1.
+
+Proof.
+  intro g; simpl.
+  reflexivity.
+Qed.
+
+
+
+Lemma word_length_s {n : nat}
+
+  : forall (g : Generators n) (w : FreeGroup n), word_length (fcon g w) = S (word_length w).
+
+Proof.
+  auto.
+Qed.
 
 
 
@@ -2202,11 +2273,9 @@ Proof.
   induction g.
   - intros h E eqv; destruct h.
     + exact (strong_free_equiv_refl _).
-    + simpl in eqv.
-      exfalso; exact eqv.
+    + simpl in eqv. exfalso; exact eqv.
   - intros h E eqv; destruct h.
-    + simpl in eqv.
-      exfalso; exact eqv.
+    + simpl in eqv. exfalso; exact eqv.
     + simpl in eqv; simpl.
       split; destruct eqv.
       * exact (gen_equiv_sym n g g1 H).
@@ -2258,7 +2327,7 @@ Instance strong_free_equiv_is_equiv {n : nat}
 
 
 
-Lemma strong_free_equiv_respects_con {n : nat}
+Lemma free_con_respects_strong_free_equiv {n : nat}
 
   : forall (x y : Generators n) {g h : FreeGroup n},
       let E := strong_free_equiv in
@@ -2270,11 +2339,8 @@ Lemma strong_free_equiv_respects_con {n : nat}
 Proof.
   intros x y g h E ge.
   split.
-  - intro eqv.
-    simpl.
-    split.
-    exact ge.
-    exact eqv.
+  - intro eqv; simpl.
+    split. exact ge. exact eqv.
   - intro eqv.
     simpl in eqv; destruct eqv as (_ & eqv').
     exact eqv'.
@@ -2523,6 +2589,37 @@ Qed.
 
 
 
+Lemma reduce1_on_length {n : nat}
+
+  : forall (g : FreeGroup n), 
+
+      (word_length g = word_length (reduce1 g)) \/ (word_length g = S (S (word_length (reduce1 g)))).
+
+Proof.
+  induction g.
+  - simpl. left; trivial.
+  - destruct g0.
+    + simpl. left; trivial.
+    + set (inv_dec := is_inverse_gen_is_decidable g g0).
+      destruct inv_dec as [ninv | inv].
+      * repeat fold (@fcon n) in *. 
+        rewrite (pass_reduce1 g1 ninv).
+        destruct IHg as [l | r].
+        -- repeat rewrite (word_length_s g _).
+          rewrite <- l.
+          left; reflexivity.
+        -- repeat rewrite (word_length_s g _).
+          rewrite <- r.
+          right; reflexivity.
+      * repeat fold (@fcon n) in *.
+        rewrite (simpl_reduce1_on_inv inv).
+        right.
+        repeat rewrite (word_length_s _ _).
+        reflexivity.
+Qed.
+
+
+
 Lemma reduce1_normal_is_id {n : nat}
 
   : forall {xs : FreeGroup n}, normalized xs -> (reduce1 xs = xs).
@@ -2543,6 +2640,35 @@ Proof.
       induction e.
       apply f_equal.
       exact redxs.
+Qed.
+
+
+
+Lemma length_fixpoint_is_normal {n : nat}
+
+  : forall (w : FreeGroup n), (word_length w = word_length (reduce1 w)) -> normalized w.
+
+Proof.
+  intros w e.
+  induction w.
+  - simpl; trivial.
+  - destruct w.
+    + exact (singleton_is_normalized g).
+    + repeat rewrite (word_length_s _ _) in e.
+      set (inv_dec := is_inverse_gen_is_decidable g g0).
+      destruct inv_dec as [ninv | inv].
+      * repeat fold (@fcon n) in *. rewrite (pass_reduce1 w ninv) in e.
+        rewrite (word_length_s _ _) in e.
+        apply (extend_normalized ninv).
+        apply IHw.
+        inversion e.
+        exact H0.
+      * exfalso.
+        rewrite (simpl_reduce1_on_inv inv) in e.
+        induction (word_length w).
+        discriminate e.
+        inversion e.
+        exact (IHn0 H0).
 Qed.
 
 
@@ -2623,7 +2749,7 @@ Proof.
         destruct inv_dec as [ninv | inv].
         -- fold (@fcon n); rewrite (pass_reduce1 h  ninv).
           unfold singleton.
-          set (resp := proj1 (@strong_free_equiv_respects_con n g g1 fid (reduce1 (fcon g0 h)) ge)).
+          set (resp := proj1 (@free_con_respects_strong_free_equiv n g g1 fid (reduce1 (fcon g0 h)) ge)).
           apply resp.
           exact IHg'.
         -- simpl in eqv.
@@ -2643,7 +2769,7 @@ Proof.
           apply is_inverse_gen_swap in hyp_inv.
           exact (ninv hyp_inv).
           rewrite (pass_reduce1 h H).
-          apply (proj1 (strong_free_equiv_respects_con g g1 ge)).
+          apply (proj1 (free_con_respects_strong_free_equiv g g1 ge)).
           exact IHg'.
         -- rewrite (simpl_reduce1_on_inv inv).
           assert (is_inverse_gen g1 g3).
@@ -2823,14 +2949,226 @@ Qed.
 
 
 
+Lemma word_length_reduce1 {n : nat}
+
+  : forall (g : Generators n) (w : FreeGroup n),
+
+      word_length (reduce1 (fcon g w)) <= S (word_length w).
+
+Proof.
+  intros g w.
+  destruct (reduce1_on_length (fcon g w)) as [l | r].
+  - rewrite <- l.
+    rewrite word_length_s.
+    exact (le_n _).
+  - rewrite word_length_s in r.
+    set (e := le_n (word_length (reduce1 (fcon g w)))).
+    set (e' := le_S _ _ (le_S _ _ e)).
+    rewrite <- r in e'.
+    exact e'.
+Qed.
+
+
+
+Lemma normalizable_via_length {n : nat} (g : FreeGroup n)
+
+  : normalized (reduce (word_length g) g).
+
+Proof.
+  destruct (reduce1_on_length g) as [l | r].
+  - set (ng := length_fixpoint_is_normal g l).
+    set (e  := reduce_normal_is_id (word_length g) ng).
+    rewrite e; exact ng.
+  - assert (word_length g > word_length (reduce1 g)).
+    rewrite r; unfold ">"; unfold "<".
+    exact (le_S _ _ (le_n (S (word_length (reduce1 g))))).
+    clear r.
+    induction g.
+    + simpl; trivial.
+    + rewrite word_length_s in H.
+      destruct (reduce1_on_length (free_con n g g0)) as [l | r].
+      * rewrite <- l in H.
+        rewrite word_length_s in H.
+        exfalso; exact (none_less_than_itself H).
+      * clear H.
+        rewrite word_length_s in *.
+        destruct g0.
+        -- simpl in *.
+          trivial.
+        -- set (inv_dec := is_inverse_gen_is_decidable g g0).
+          destruct inv_dec as [ninv | inv].
+          ++ rewrite (pass_reduce1 _ ninv) in r.
+            apply (normalized_respects_strong_free_equiv $ sym $ pass_reduce _ _).
+            repeat rewrite word_length_s in *.
+            set (le_n (S (S (word_length g1)))).
+            pattern (S (S (word_length g1))) at 1 in l.
+            rewrite r in l.
+            apply le_S in l.
+            fold (lt (S (S (word_length (reduce1 (fcon g0 g1))))) (S (S (S (word_length g1))))) in l.
+            repeat apply reduce_succ_lt in l.
+            unfold ">" in IHg; fold (@fcon n) in IHg.
+            set (IHg l).
+            apply (extend_normalized_weak g) in n0.
+            exact n0.
+          ++ repeat fold (@fcon n) in *.
+            unfold reduce; rewrite repeat_on_left; fold (@reduce n (word_length (fcon g0 g1))).
+            rewrite (simpl_reduce1_on_inv inv) in *.
+            repeat rewrite word_length_s in *.
+            clear r.
+            set (word_length_reduce1 g0 g1).
+            apply split_le in l.
+            destruct l as [l | r].
+            ** set (IHg' := IHg l).
+              exact (children_are_really_normal _ _ _ IHg').
+            ** destruct (reduce1_on_length (fcon g0 g1)) as [l' | r'].
+              set (norm := length_fixpoint_is_normal _ l').
+              set (norm' := children_are_normal norm).
+              rewrite (reduce_normal_is_id _ norm'); exact norm'.
+              rewrite word_length_s in r'.
+              rewrite r in r'.
+              inversion r'.
+              exfalso.
+              set (intro_lt (eq_sym H0)).
+              set (intro_lt (eq_refl (S (word_length g1)))).
+              set (lt_trans l0 l).
+              exact (none_less_than_itself l1).
+Qed.
+
+
+
+(*
+Definition normalizable_compute {n : nat} (g : FreeGroup n)
+
+  : {m : nat & normalized (reduce m g)}
+
+:=
+  let base :=
+        existT 
+          (fun m => normalized (reduce m fid))
+          0 
+          I
+  in
+
+  let step := 
+        fun (g : Generators n) (xs : FreeGroup n) (hyp : {m : nat & normalized (reduce m xs)}) =>
+          let m    := projT1 hyp in
+          let norm := projT2 hyp in
+
+            existT 
+              (fun k => normalized (reduce k (fcon g xs)))
+              (S m)
+              @(match xs with
+                | free_id  _       => 
+                    fun (eq_xs : xs = free_id n) =>
+                      let norm_sng := singleton_is_normalized g in
+                      let red      := reduce_normal_is_id (S m) norm_sng in
+
+                        eq_ind
+                          (free_id n)
+                          (fun xs' => normalized (reduce (S m) (fcon g xs')))
+                          (eq_ind _ _ norm_sng _ (eq_sym red))
+                          (xs)
+                          (eq_sym eq_xs)
+
+                | free_con _ g' ys => 
+                    fun (eq_xs : xs = free_con n g' ys) =>
+                      let inv_dec := is_inverse_gen_is_decidable g g' in
+                      let norm'   := eq_ind _ (fun xs' => normalized (reduce m xs')) norm _ eq_xs in
+
+                        eq_ind 
+                          (free_con n g' ys)
+                          (fun xs' => normalized (reduce (S m) (fcon g xs')))
+
+                          (match inv_dec with
+                            | or_introl ninv =>
+                                let zs := reduce m (fcon g' ys) in
+
+                                  normalized_respects_strong_free_equiv (sym $ pass_reduce m ys) $
+                                    (match zs with
+                                    | free_id _ => 
+                                        fun (eq_zs : reduce m (fcon g' ys) = free_id n) =>
+                                          let norm_sng := singleton_is_normalized g in
+                                          let red      := reduce1_normal_is_id norm_sng in
+
+                                            eq_ind 
+                                              fid 
+                                              (fun zs' => normalized (reduce1 (fcon g zs'))) 
+                                              (eq_ind _ _ norm_sng _ (eq_sym red))
+                                              (reduce m (fcon g' ys)) 
+                                              (eq_sym eq_zs)
+
+                                    | free_con _ h hs => 
+                                        fun (eq_zs : reduce m (fcon g' ys) = free_con n h hs) => 
+                                          let norm''   := eq_ind _ (fun zs' => normalized zs') norm' _ eq_zs in
+                                          let inv_dec' := is_inverse_gen_is_decidable g h in
+                                            match inv_dec' with
+                                            | or_introl ninv' =>
+                                                  eq_ind 
+                                                    (free_con n h hs)
+                                                    (fun zs' => normalized (reduce1 (fcon g zs')))
+                                                    (let pass := pass_reduce1 hs ninv' in
+                                                     let red  := reduce1_normal_is_id norm'' in 
+                                                        eq_ind 
+                                                          _
+                                                          (fun ps => normalized ps)
+                                                          (eq_ind 
+                                                            _
+                                                            (fun qs => normalized (fcon g qs))
+                                                            (extend_normalized ninv' norm'')
+                                                            _
+                                                            (eq_sym red))
+                                                          _
+                                                          (eq_sym pass))
+                                                    zs
+                                                    (eq_sym eq_zs)
+
+
+                                            | or_intror inv'  => _
+                                            end
+                                    end) eq_refl
+
+                            | or_intror inv  => _
+                            end)
+
+                            xs
+                            (eq_sym eq_xs)
+                end) eq_refl
+
+  in
+    FreeGroup_rect n (fun h => {m : nat & normalized (reduce m h)}) base step g.
+*)
+
+
+
 Definition normalize {n : nat}
 
   : FreeGroup n -> FreeGroup n
 
 :=
-  fun g =>
-    reduce (projT1 (normalizable g)) g.
+  fun g => reduce (word_length g) g.
 
+
+
+Corollary normal_is_normalized {n : nat}
+
+  : forall (g : FreeGroup n), normalized (normalize g).
+
+Proof.
+  intro g; unfold normalize.
+  exact (normalizable_via_length _).
+Qed.
+
+
+
+Corollary normalize_normal_is_id {n : nat}
+
+  : forall (g : FreeGroup n), normalized g -> normalize g = g.
+
+Proof.
+  intros g norm.
+  unfold normalize; simpl.
+  exact (reduce_normal_is_id _ norm).
+Qed.
 
 
 Definition free_equiv {n : nat}
@@ -2892,6 +3230,69 @@ Instance free_equiv_is_equiv {n : nat}
 
 
 
+Lemma free_con_well_def_on_free_equiv {n : nat}
+
+  : forall {g g' : Generators n} {w w' : FreeGroup n},
+      let G := gen_equiv n in
+      let F := free_equiv in
+
+        G g g' -> F w w' -> F (fcon g w) (fcon g' w').
+
+Proof.
+  intros g g'.
+  induction w.
+  - destruct w'.
+    + intros G F ge fe.
+      unfold F, free_equiv.
+      fold (@fid n); fold (@singleton n g); fold (@singleton n g').
+      repeat rewrite (normalize_normal_is_id _ (singleton_is_normalized _)).
+      simpl. split. exact ge. trivial.
+    + intros G F ge fe.
+      unfold F, free_equiv; unfold F, free_equiv in fe.
+      rewrite (normalize_normal_is_id _ fid_is_normal) in fe.
+      fold (@fid n); fold (@singleton n g).
+      rewrite (normalize_normal_is_id _ (singleton_is_normalized _)).
+      unfold normalize.
+      rewrite word_length_s.
+      fold (@fcon n) in *.
+      apply (rtrans $ sym (@pass_reduce n (word_length (fcon g0 w')) w' g' g0)).
+      fold (normalize (fcon g0 w')).
+      set (nw := normalize (fcon g0 w')).
+      fold nw in fe.
+      destruct nw.
+      * simpl. split. exact ge. trivial.
+      * simpl in fe. exfalso; exact fe.
+  - destruct w'.
+    + intros G F ge fe.
+      unfold F, free_equiv; unfold F, free_equiv in fe.
+      fold (@fcon n) in *; fold (@fid n) in *; fold (@singleton n g').
+      rewrite (normalize_normal_is_id _ (singleton_is_normalized g')).
+      rewrite (normalize_normal_is_id _ fid_is_normal) in fe.
+      unfold normalize.
+      rewrite word_length_s.
+      apply (trans (@pass_reduce n (word_length (fcon g0 w)) w g g0)).
+      fold (normalize (fcon g0 w)).
+      set (nw := normalize (fcon g0 w)).
+      fold nw in fe.
+      destruct nw.
+      * simpl. split. exact ge. trivial.
+      * simpl in fe. exfalso; exact fe.
+    + intros G F ge fe.
+      unfold F, free_equiv, normalize.
+      rewrite word_length_s.
+      fold (@fcon n). 
+      apply (trans (@pass_reduce n (word_length (fcon g0 w)) w g g0)).
+      fold (normalize (fcon g0 w)).
+      rewrite word_length_s.
+      apply (rtrans $ sym $ @pass_reduce n (word_length (fcon g1 w')) w' g' g1).
+      fold (normalize (fcon g1 w')).
+      unfold F, free_equiv in fe.
+      destruct (@free_con_respects_strong_free_equiv n g g' (normalize (fcon g0 w)) (normalize (fcon g1 w')) ge) as (f & _).
+      exact (reduce1_well_def $ f fe).
+Qed.
+
+
+
 Definition free_mult {n : nat}
 
   : FreeGroup n -> FreeGroup n -> FreeGroup n
@@ -2900,13 +3301,115 @@ Definition free_mult {n : nat}
   fix con xs ys :=
     match xs with
     | free_id     _      => ys
-    | free_con _ g zs => fcon g @ con zs ys
+    | free_con _ g zs => fcon g (con zs ys)
     end.
 
 
 
+Lemma free_mult_left_id {n : nat}
+
+  : forall (g : FreeGroup n), free_equiv (free_mult fid g) g.
+
+Proof.
+  intro g; simpl. exact (free_equiv_refl g).
+Qed.
 
 
+
+Lemma free_mult_right_id {n : nat}
+
+  : forall (g : FreeGroup n), free_equiv (free_mult g fid) g.
+
+Proof.
+  intro g; simpl.
+  induction g.
+  - simpl; exact (free_equiv_refl fid).
+  - simpl.
+    unfold app.
+    exact (free_con_well_def_on_free_equiv (refl g) IHg).
+Qed.
+
+About pass_reduce.
+
+Lemma normalize_sub {n : nat}
+
+  : forall {g h : FreeGroup n},
+
+      free_equiv (free_mult g h) (free_mult (normalize g) (normalize h)).
+
+Proof.
+  induction g.
+  - intro h.
+    simpl.
+    unfold free_equiv.
+    rewrite (normalize_normal_is_id _ (normal_is_normalized h)).
+    exact (refl _).
+  - intro h.
+    set (IHg' := IHg h).
+    set (free_con_well_def_on_free_equiv (refl g) IHg').
+    unfold free_mult at 1.
+    fold (free_mult g0 h).
+    apply (trans f).
+    unfold free_equiv.
+    unfold normalize at 1.
+    rewrite word_length_s.
+    set (m := word_length (free_mult (normalize g0) (normalize h))).
+    set (w := free_mult (normalize g0) (normalize h)).
+    set (pass := pass_reduce m w).
+
+
+
+Lemma free_mult_eq_id {n : nat}
+
+  : forall {g h : FreeGroup n},
+
+      free_equiv fid g -> free_equiv fid h -> free_equiv fid (free_mult g h).
+
+Proof.
+  destruct g, h.
+  - simpl; trivial.
+  - simpl; trivial.
+  - intros e1 e2.
+    apply (rtrans $ sym $ free_mult_right_id _).
+    exact e1.
+  - intros e1 e2.
+    unfold free_equiv in *.
+    repeat rewrite (normalize_normal_is_id _ fid_is_normal) in *.
+    fold (@fid n); fold (@fcon n). 
+
+
+
+Lemma free_mult_well_def {n : nat}
+
+  : forall {g g' h h' : FreeGroup n},
+
+      free_equiv g g' -> free_equiv h h' -> free_equiv (free_mult g h) (free_mult g' h').
+
+Proof.
+  induction g.
+  - destruct g'.
+    + simpl. trivial.
+    + induction h.
+      * destruct h'.
+        -- simpl; unfold app.
+          intros e1 e2.
+          set (free_mult_right_id g').
+          apply (rtrans $ sym $ free_con_well_def_on_free_equiv (refl g) f).
+          exact e1.
+        -- intros e1 e2.
+          simpl; unfold app.
+          set (g0h' := fcon g0 h').
+          fold (@fcon n) in *; fold g0h'; fold g0h' in e2.
+          destruct g0h'.
+          ++ set (free_mult_right_id g').
+            apply (rtrans $ sym $ free_con_well_def_on_free_equiv (refl g) f).
+            apply (rtrans e1).
+            exact e2.
+          ++ assert (free_mult (fcon g g') (fcon g1 g0h') = fcon g (free_mult g' (fcon g1 g0h'))).
+            simpl; unfold app.
+            reflexivity.
+            apply (rtrans $ lift_eq H).
+            
 
 
 
