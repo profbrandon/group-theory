@@ -3066,6 +3066,30 @@ Proof.
 Defined.
 
 
+
+Corollary unfold_normalize {n : nat}
+
+  : forall (g : Generators n) (w : FreeGroup n),
+      let E := strong_free_equiv in
+
+        E (normalize (fcon g w)) (reduce1 (fcon g (normalize w))).
+
+Proof.
+  intros g w.
+  unfold normalize.
+  rewrite word_length_s.
+  apply (trans $ pass_reduce _ _).
+  fold (normalize w).
+  exact (refl _).
+Defined.
+
+
+
+
+
+
+(* free group word equivalence *)
+
 Definition free_equiv {n : nat}
 
   : FreeGroup n -> FreeGroup n -> Prop
@@ -3188,6 +3212,34 @@ Defined.
 
 
 
+Lemma lift_strong_free_equiv {n : nat}
+
+  : forall (w w' : FreeGroup n),
+      let G := strong_free_equiv in
+      let F := free_equiv in
+
+        G w w' -> F w w'.
+
+Proof.
+  induction w.
+  - destruct w'.
+    + simpl. trivial.
+    + intros G F s.
+      simpl in s.
+      exfalso; exact s.
+  - destruct w'.
+    + intros G F s.
+      simpl in s.
+      exfalso; exact s.
+    + intros G F s.
+      simpl in s.
+      destruct s as (ge & s').
+      set (fe := IHw w' s').
+      apply (free_con_well_def_on_free_equiv ge fe).
+Defined.
+
+
+
 Definition free_mult {n : nat}
 
   : FreeGroup n -> FreeGroup n -> FreeGroup n
@@ -3198,6 +3250,68 @@ Definition free_mult {n : nat}
     | free_id     _      => ys
     | free_con _ g zs => fcon g (con zs ys)
     end.
+
+
+
+Lemma free_mult_con_left {n : nat}
+
+  : forall (w w' : FreeGroup n) {g g' : Generators n},
+      let G := gen_equiv n in
+      let F := free_equiv in
+
+        G g g' -> F (fcon g (free_mult w w')) (free_mult (fcon g' w) w').
+
+Proof.
+  induction w.
+  - intros w' g g' G F e.
+    simpl.
+    apply lift_strong_free_equiv; simpl.
+    split. exact e. exact (refl w').
+  - intros w' h h' G F e.
+    set (IHw' := IHw w' g g (refl g)).
+    simpl.
+    apply (free_con_well_def_on_free_equiv e).
+    exact IHw'.
+Defined.
+
+
+
+Lemma free_mult_con_left2 {n : nat}
+
+  : forall (w w' : FreeGroup n) {g g' : Generators n},
+      let G := gen_equiv n in
+      let F := free_equiv in
+
+        G g g' -> F (free_mult w (fcon g w')) (free_mult (free_mult w (singleton g')) w').
+
+Proof.
+  induction w.
+  - intros w' g g' G F e; simpl.
+    apply (free_con_well_def_on_free_equiv e).
+    exact (refl w').
+  - intros w' h h' G F e; simpl.
+    apply (free_con_well_def_on_free_equiv @ refl g).
+    exact (IHw w' h h' e).
+Defined.
+
+
+
+Lemma free_append_well_def_on_free_equiv_part1 {n : nat}
+
+  : forall (w : FreeGroup n) {g g' : Generators n},
+      let G := gen_equiv n in
+      let F := free_equiv in
+
+        G g g' -> F (free_mult w (singleton g)) (free_mult w (singleton g')).
+
+Proof.
+  induction w.
+  - intros g g' G F e; simpl.
+    exact (free_con_well_def_on_free_equiv e (refl fid)).
+  - intros h h' G F e; simpl.
+    apply (free_con_well_def_on_free_equiv (refl g)).
+    exact (IHw h h' e).
+Defined.
 
 
 
@@ -3225,6 +3339,38 @@ Proof.
 Defined.
 
 
+
+Lemma insert_normalize {n : nat}
+
+  : forall (w v : FreeGroup n),
+      let F := free_equiv in
+
+      F w v -> F (normalize w) (normalize v).
+
+Proof.
+  intros w v F e.
+  unfold F, free_equiv in e.
+  exact (lift_strong_free_equiv _ _ e).
+Defined.
+
+
+
+Lemma free_mult_well_defined_on_free_equiv_part1 {n : nat}
+
+  : forall {w v v' : FreeGroup n},
+      let F := free_equiv in
+
+        F v v' -> F (free_mult w v) (free_mult w v').
+
+Proof.
+  induction w.
+  - intros v v' F e; simpl.
+    exact e.
+  - intros v v' F e; simpl.
+    set (IHw' := IHw v v' e).
+    apply (free_con_well_def_on_free_equiv (refl g)).
+    exact IHw'.
+Defined.
 
 
 
