@@ -45,7 +45,7 @@ Proof.
     reflexivity.
   - simpl.
     exact (fun x => IHn (f x)).
-Qed.
+Defined.
 
 
 
@@ -55,7 +55,7 @@ Lemma repeat_on_left {A : Type} (f : A -> A) (n : nat)
 
 Proof.
   auto.
-Qed.
+Defined.
 
 
 
@@ -82,7 +82,7 @@ Proof.
     + destruct (IHn m).
       * left; exact (not_eq_S n m H).
       * right; exact (f_equal S H).
-Qed.
+Defined.
 
 
 
@@ -105,7 +105,7 @@ Proof.
   - trivial.
   - simpl.
     exact IHn.
-Qed.
+Defined.
 
 
 
@@ -135,7 +135,7 @@ Proof.
         injection e; intro e'.
         rewrite e'.
         exact (nat_eq_refl m).
-Qed.
+Defined.
 
 
 
@@ -156,7 +156,7 @@ Proof.
     induction (nat_eq n m).
     + exfalso; exact (z $ reflect_f $ eq_refl _).
     + reflexivity.
-Qed.
+Defined.
 
 
 
@@ -177,7 +177,7 @@ Proof.
     rewrite q; reflexivity.
   - destruct H.
     discriminate H.
-Qed.
+Defined.
 
 
 
@@ -195,7 +195,7 @@ Proof.
     + exact l.
     + intros m' e1 e2.
       exact (le_S _ _ e2).
-Qed.
+Defined.
 
 
 
@@ -212,7 +212,7 @@ Proof.
     + exact (le_S _ _ (le_n (S (S n)))).
     + intros m' e1 e2.
       exact (le_S _ _ e2).
-Qed.
+Defined.
 
 
 
@@ -226,7 +226,7 @@ Proof.
   - exact (none_less_than_zero e).
   - apply reduce_succ_lt in e.
     exact (IHn e).
-Qed.
+Defined.
 
 
 
@@ -240,7 +240,7 @@ Proof.
   - exact (le_S _ _ e1).
   - intros m' e3 e4.
     exact (le_S _ _ e4).
-Qed.
+Defined.
 
 
 
@@ -251,7 +251,7 @@ Lemma none_less_and_greater
 Proof.
   intros n m e e'.
   exact (none_less_than_itself (lt_trans e e')).
-Qed.
+Defined.
 
 
 
@@ -271,7 +271,7 @@ Proof.
       exact (le_n (S n)).
     + left; rewrite r.
       exact (le_n (S m')).
-Qed.
+Defined.
 
 
 
@@ -283,7 +283,7 @@ Proof.
   intros n m e; unfold "<".
   rewrite e.
   exact (le_n _).
-Qed.
+Defined.
 
 
 
@@ -367,7 +367,7 @@ Proof.
   apply (trans $ sym $ right_id $ id*).
   apply (trans $ left_inv id).
   exact (refl id).
-Qed.
+Defined.
 
 
 
@@ -381,7 +381,7 @@ Proof.
   apply (trans assoc).
   apply (trans $ mult_well_def (left_inv $ g*) @ refl g).
   exact (left_id g).
-Qed.
+Defined.
 
 
 
@@ -394,7 +394,7 @@ Proof.
   apply mult_well_def.
   - exact (sym $ idempot_inv g).
   - exact (refl $ g*).
-Qed.
+Defined.
 
 
 
@@ -413,7 +413,7 @@ Proof.
   apply mult_well_def.
   - exact (refl @ g*).
   - exact e.
-Qed.
+Defined.
 
 
 
@@ -432,7 +432,7 @@ Proof.
   apply mult_well_def.
   - exact e.
   - exact (refl (g*)).
-Qed.
+Defined.
 
 
 
@@ -450,7 +450,7 @@ Proof.
   apply (rtrans $ sym $ mult_well_def @ left_inv g @ refl b).
   apply (rtrans $ sym $ left_id b).
   exact p.
-Qed.
+Defined.
 
 
 
@@ -468,7 +468,7 @@ Proof.
   apply (rtrans $ sym $ mult_well_def @ refl b @ right_inv g).
   apply (rtrans $ sym $ right_id b).
   exact p.
-Qed.
+Defined.
 
 
 
@@ -483,7 +483,7 @@ Proof.
   apply (rtrans $ sym $ mult_well_def @ right_inv g @ refl b).
   apply (rtrans $ sym $ left_id b).
   exact p.
-Qed.
+Defined.
 
 
 
@@ -496,7 +496,7 @@ Proof.
   apply (rtrans $ mult_well_def @ idempot_inv g @ refl b).
   apply shift_left.
   exact p.
-Qed.
+Defined.
 
 
 
@@ -511,7 +511,7 @@ Proof.
   apply (rtrans $ sym $ mult_well_def @ refl b @ left_inv g).
   apply (rtrans $ sym $ right_id b).
   exact p.
-Qed.
+Defined.
 
 
 
@@ -524,7 +524,7 @@ Proof.
   apply (rtrans $ mult_well_def @ refl b @ idempot_inv g).
   apply shift_right.
   exact p.
-Qed.
+Defined.
 
 
 
@@ -537,7 +537,7 @@ Proof.
   apply (left_cancel g).
   apply shift_left_inv.
   exact p.
-Qed.
+Defined.
 
 
 
@@ -552,7 +552,7 @@ Proof.
   apply (trans $ mult_well_def @ refl _ @ idempot_inv g).
   apply (trans $ sym assoc).
   exact p.
-Qed.
+Defined.
 
 
 
@@ -565,7 +565,7 @@ Proof.
   apply (left_cancel @ g*).
   apply shift_left.
   exact p.
-Qed.
+Defined.
 
 
 
@@ -579,7 +579,7 @@ Proof.
   apply shift_right_inv.
   apply (trans $ sym assoc).
   exact p.
-Qed.
+Defined.
 
 
 
@@ -593,7 +593,7 @@ Proof.
   apply (rtrans $ idempot_inv b).
   apply inv_well_def.
   exact e.
-Qed.
+Defined.
 
 
 
@@ -612,7 +612,7 @@ Proof.
   apply mult_well_def.
   exact (sym $ left_inv g).
   exact (refl h).
-Qed.
+Defined.
 
 
 
@@ -624,7 +624,7 @@ Proof.
   intro l_id_cond.
   apply (trans $ sym $ l_id_cond id).
   exact (right_id e).
-Qed.
+Defined.
 
 
 
@@ -636,7 +636,7 @@ Proof.
   intro r_id_cond.
   apply (trans $ sym $ r_id_cond id).
   exact (right_id e).
-Qed.
+Defined.
 
 
 
@@ -649,7 +649,7 @@ Proof.
   apply (right_cancel g).
   apply (rtrans $ sym $ left_inv g).
   exact l_inv_cond.
-Qed.
+Defined.
 
 
 
@@ -662,7 +662,7 @@ Proof.
   apply (left_cancel g).
   apply (rtrans $ sym $ right_inv g).
   exact r_inv_cond.
-Qed.
+Defined.
 
 
 
@@ -676,7 +676,7 @@ Proof.
   apply sym.
   apply shift_right.
   exact (right_id g).
-Qed.
+Defined.
 
 
 
@@ -693,7 +693,7 @@ Proof.
   apply (trans $ mult_well_def @ refl _ @ sym assoc).
   apply (trans $ sym $ mult_well_def @ refl _ $ mult_well_def @ refl _ @ inv_mult a b).
   exact (refl _).
-Qed.
+Defined.
 
 
 
@@ -707,7 +707,7 @@ Proof.
   apply (mult_well_def e2).
   apply (fun e => mult_well_def e @ inv_well_def e2).
   exact e1.
-Qed.
+Defined.
 
 
 
@@ -720,7 +720,7 @@ Proof.
   apply (trans $ double_conj (b*) b a).
   apply (trans $ conj_well_def @ refl a @ left_inv b).
   exact (conj_id a).
-Qed.
+Defined.
 
 
 
@@ -771,7 +771,7 @@ Proof.
   destruct s.
   unfold subgroup_equiv.
   exact (refl x).
-Qed.
+Defined.
 
 
 
@@ -785,7 +785,7 @@ Proof.
   unfold subgroup_equiv in e.
   unfold subgroup_equiv.
   exact (sym e).
-Qed.
+Defined.
 
 
 
@@ -799,7 +799,7 @@ Proof.
   unfold subgroup_equiv in e1, e2.
   unfold subgroup_equiv.
   exact (trans e1 e2).
-Qed.
+Defined.
 
 
 
@@ -855,7 +855,7 @@ Proof.
   simpl.
   unfold R', subgroup_equiv in e1, e2.
   exact (mult_well_def e1 e2).
-Qed.
+Defined.
 
 
 
@@ -873,7 +873,7 @@ Proof.
   unfold subgroup_mult, m, R', subgroup_equiv.
   simpl.
   exact assoc.
-Qed.
+Defined.
 
 
 
@@ -887,7 +887,7 @@ Proof.
   unfold subgroup_equiv, subgroup_mult, subgroup_id.
   simpl.
   exact (left_id x).
-Qed.
+Defined.
 
 
 
@@ -901,7 +901,7 @@ Proof.
   unfold subgroup_equiv, subgroup_mult, subgroup_id.
   simpl.
   exact (right_id x).
-Qed.
+Defined.
 
 
 
@@ -931,7 +931,7 @@ Proof.
   simpl.
   unfold subgroup_equiv, subgroup_inv in e.
   exact (inv_well_def e).
-Qed.
+Defined.
 
 
 
@@ -945,7 +945,7 @@ Proof.
   unfold subgroup_equiv, subgroup_mult, subgroup_inv, subgroup_id.
   simpl.
   exact (left_inv x).
-Qed.
+Defined.
 
 
 
@@ -995,7 +995,7 @@ Proof.
   destruct g.
   simpl.
   exact (refl _).
-Qed.
+Defined.
 
 
 
@@ -1008,7 +1008,7 @@ Proof.
   destruct a, b.
   simpl.
   exact (refl _).
-Qed.
+Defined.
 
 
 
@@ -1023,7 +1023,7 @@ Proof.
   split.
   - trivial.
   - trivial.
-Qed.
+Defined.
 
 
 
@@ -1059,7 +1059,7 @@ Proof.
   exists id.
   exists id.
   exact (refl _).
-Qed.
+Defined.
 
 
 
@@ -1078,7 +1078,7 @@ Proof.
   destruct e, H3.
   exists x0, x.
   exact (sym H3).
-Qed.
+Defined.
 
 
 
@@ -1109,7 +1109,7 @@ Proof.
   apply mult_well_def.
   - exact (refl b).
   - exact (trans @ right_inv x1 @ sym (right_inv x0)).
-Qed.
+Defined.
 
 
 
@@ -1140,7 +1140,7 @@ Proof.
   apply mult_well_def.
   exact assoc.
   exact (refl id).
-Qed.
+Defined.
 
 
 
@@ -1156,7 +1156,7 @@ Proof.
   apply mult_well_def.
   - exact (left_id a).
   - exact (refl id).
-Qed.
+Defined.
 
 
 
@@ -1172,7 +1172,7 @@ Proof.
   apply mult_well_def.
   - exact (right_id a).
   - exact (refl id).
-Qed.
+Defined.
 
 
 
@@ -1188,7 +1188,7 @@ Proof.
   apply mult_well_def.
   - exact (left_inv a).
   - exact (refl id).
-Qed.
+Defined.
 
 
 
@@ -1236,7 +1236,7 @@ Proof.
     apply (rtrans $ sym $ mult_well_def @ refl a' @ right_inv b').
     exact (sym $ right_id a').
   - exact (refl x1).
-Qed.
+Defined.
 
 
 
@@ -1269,7 +1269,7 @@ Proof.
     apply (rtrans $ inv_mult _ _).
     apply inv_well_def.
     exact H3.
-Qed.
+Defined.
 
 
 
@@ -1342,7 +1342,7 @@ Proof.
   apply (rtrans $ preserves_id).
   apply hom_well_def.
   exact (left_inv x).
-Qed.
+Defined.
 
 
 
@@ -1368,7 +1368,7 @@ Proof.
   intro g.
   exists g.
   exact (refl @ h g).
-Qed.
+Defined.
 
 
 
@@ -1380,7 +1380,7 @@ Proof.
   unfold is_in_image.
   exists id.
   exact preserves_id.
-Qed.
+Defined.
 
 
 
@@ -1396,7 +1396,7 @@ Proof.
   exists x.
   apply (rtrans p).
   exact H4.
-Qed.
+Defined.
 
 
 
@@ -1414,7 +1414,7 @@ Proof.
   apply mult_well_def.
   - exact H4.
   - exact H5.
-Qed.
+Defined.
 
 
 
@@ -1431,7 +1431,7 @@ Proof.
   apply (trans $ hom_preserves_inv h x).
   apply inv_well_def.
   exact H4.
-Qed.
+Defined.
 
 
 
@@ -1470,7 +1470,7 @@ Proof.
   unfold subgroup_equiv, is_in_image, restrict_cod, subgroup_id.
   simpl.
   exact preserves_id.
-Qed.
+Defined.
 
 
 
@@ -1485,7 +1485,7 @@ Proof.
   intros.
   unfold S, h', subgroup_equiv, is_in_image, restrict_cod, subgroup_mult; simpl.
   exact break.
-Qed.
+Defined.
 
 
 
@@ -1500,7 +1500,7 @@ Proof.
   intros S h' x y p.
   unfold S, h', subgroup_equiv, is_in_image, restrict_cod, subgroup_mult; simpl.
   exact (hom_well_def p).
-Qed.
+Defined.
 
 
 
@@ -1542,7 +1542,7 @@ Lemma kernel_contains_id {G G' : Type} {R : G -> G -> Prop} {R' : G' -> G' -> Pr
 Proof.
   unfold is_in_kernel.
   exact preserves_id.
-Qed.
+Defined.
 
 
 
@@ -1558,7 +1558,7 @@ Proof.
   apply (trans $ sym e).
   apply hom_well_def.
   exact p.
-Qed.
+Defined.
 
 
 
@@ -1573,7 +1573,7 @@ Proof.
   apply (rtrans $ left_id id).
   apply (rtrans $ mult_well_def e1 e2).
   exact break.
-Qed.
+Defined.
 
 
 
@@ -1589,7 +1589,7 @@ Proof.
   apply (rtrans inv_id).
   apply inv_well_def.
   exact e.
-Qed.
+Defined.
 
 
 
@@ -1622,7 +1622,7 @@ Proof.
   apply (trans $ mult_well_def @ refl (h g) $ left_id _).
   apply (trans $ mult_well_def @ refl (h g) @ hom_preserves_inv h g).
   exact (right_inv _).
-Qed.
+Defined.
 
 
 
@@ -1686,7 +1686,7 @@ Proof.
   apply injective.
   apply (rtrans $ sym $ preserves_id).
   exact p.
-Qed.
+Defined.
 
 
 
@@ -1717,7 +1717,7 @@ Proof.
   apply (trans $ sym break).
   apply (rtrans break).
   exact (hom_well_def H4).
-Qed.
+Defined.
 
 
 
@@ -1732,7 +1732,7 @@ Proof.
   intros h' S.
   unfold S, subgroup_equiv, subgroup_id, restrict_cod; simpl.
   exact preserves_id.
-Qed.
+Defined.
 
 
 
@@ -1748,7 +1748,7 @@ Proof.
   intros h' S m x y.
   unfold S, h', m, subgroup_equiv, subgroup_mult, restrict_cod; simpl.
   exact break.
-Qed.
+Defined.
 
 
 
@@ -1791,7 +1791,7 @@ Proof.
     apply (trans assoc).
     apply (trans $ mult_well_def @ right_inv x @ refl y).
     exact (left_id y).
-Qed.
+Defined.
 
 
 
@@ -1808,7 +1808,7 @@ Proof.
   destruct z, i; simpl.
   exists x0.
   exact e.
-Qed.
+Defined.
 
 
 
@@ -1843,7 +1843,7 @@ Proof.
   exists h'.
   exists (quotient_to_image_is_hom h).
   exact (quotient_to_image_is_aut h).
-Qed.
+Defined.
 
 
 
@@ -1884,7 +1884,7 @@ Proof.
   intro g; destruct g.
   - exact (none_less_than_zero l).
   - exact (none_less_than_zero l).
-Qed.
+Defined.
 
 
 
@@ -1928,7 +1928,7 @@ Proof.
   induction n.
   - simpl; unfold gen_equiv_0; auto.
   - simpl; auto.
-Qed.
+Defined.
 
 
 
@@ -1946,7 +1946,7 @@ Proof.
     + simpl; intro H; exfalso; exact H.
     + simpl; intro H; exfalso; exact H.
     + simpl; trivial.
-Qed.
+Defined.
 
 
 
@@ -1962,7 +1962,7 @@ Proof.
     exact (none_less_than_zero l).
   - intros k k' l l' eqv.
     simpl in eqv; exact eqv.
-Qed.
+Defined.
 
 
 
@@ -1976,7 +1976,7 @@ Proof.
   - induction x.
     * simpl; trivial.
     * simpl; trivial.
-Qed.
+Defined.
 
 
 
@@ -1989,7 +1989,7 @@ Proof.
   - simpl; unfold gen_equiv_0; trivial.
   - induction x, y; simpl in *.
     auto. auto. auto. auto.
-Qed.
+Defined.
 
 
 
@@ -2009,7 +2009,7 @@ Proof.
     * intros; exfalso; exact H.
     * trivial.
     * intros p q; exact (eq_trans p q).
-Qed.
+Defined.
 
 
 
@@ -2051,7 +2051,7 @@ Proof.
   - simpl in *. symmetry; exact inv.
   - simpl in *. symmetry; exact inv.
   - simpl in *. exact inv.
-Qed.
+Defined.
 
 
 
@@ -2066,7 +2066,7 @@ Proof.
   - destruct h.
     + simpl. exact (nat_peq_is_decidable k k0).
     + simpl. auto.
-Qed.
+Defined.
 
 
 
@@ -2091,7 +2091,7 @@ Proof.
   induction g.
   - simpl; reflexivity.
   - simpl; reflexivity.
-Qed.
+Defined.
 
 
 
@@ -2122,7 +2122,7 @@ Proof.
       set (prod := gen_equiv_production k0 k0 l l1 eq_refl).
       exact (proj2 prod).
   - simpl in inv1. exfalso; exact inv1.
-Qed.
+Defined.
 
 
 
@@ -2148,7 +2148,7 @@ Proof.
     transitivity k.
     symmetry; exact eqv. exact inv.
   - simpl in *. exact inv.
-Qed.
+Defined.
 
 
 
@@ -2213,7 +2213,7 @@ Corollary singleton_has_length_1 {n : nat}
 Proof.
   intro g; simpl.
   reflexivity.
-Qed.
+Defined.
 
 
 
@@ -2223,7 +2223,7 @@ Lemma word_length_s {n : nat}
 
 Proof.
   auto.
-Qed.
+Defined.
 
 
 
@@ -2258,7 +2258,7 @@ Proof.
   - simpl; split.
     + exact (gen_equiv_refl n g).
     + exact IHg.
-Qed.
+Defined.
 
 
 
@@ -2280,7 +2280,7 @@ Proof.
       split; destruct eqv.
       * exact (gen_equiv_sym n g g1 H).
       * exact (IHg h H0).
-Qed.
+Defined.
 
 
 
@@ -2310,7 +2310,7 @@ Proof.
         split.
         exact (gen_equiv_trans n _ _ _ H H1).
         exact (IHg h k H0 H2).
-Qed.
+Defined.
 
 
 
@@ -2344,7 +2344,7 @@ Proof.
   - intro eqv.
     simpl in eqv; destruct eqv as (_ & eqv').
     exact eqv'.
-Qed.
+Defined.
 
 
 
@@ -2372,7 +2372,7 @@ Corollary fid_is_normal {n : nat}
 
 Proof.
   simpl; trivial.
-Qed.
+Defined.
 
 
 
@@ -2394,7 +2394,7 @@ Proof.
       * exact H0.
       * fold (normalized xs).
         exact H1.
-Qed.
+Defined.
 
 
 
@@ -2406,7 +2406,7 @@ Proof.
   unfold singleton.
   simpl.
   trivial.
-Qed.
+Defined.
 
 
 
@@ -2429,7 +2429,7 @@ Proof.
     split.
     + exact e.
     + exact norm.
-Qed.
+Defined.
 
 
 
@@ -2468,7 +2468,7 @@ Proof.
             set (inv'' := inverse_gen_respects_gen_equiv (sym ge') (is_inverse_gen_swap inv')).
             destruct norm as (ninv & norm').
             exfalso; exact (ninv (is_inverse_gen_swap inv'')).
-Qed.
+Defined.
 
 
 
@@ -2533,7 +2533,7 @@ Proof.
       induction k_refl.
       reflexivity.
     + exfalso; simpl in inv; exact inv.
-Qed.
+Defined.
 
 
 
@@ -2567,7 +2567,7 @@ Proof.
       induction e.
       reflexivity.
     + simpl; reflexivity.
-Qed.
+Defined.
 
 
 
@@ -2585,7 +2585,7 @@ Proof.
   rewrite (pass_reduce1 _ inv1).
   rewrite (pass_reduce1 _ inv2).
   reflexivity.
-Qed.
+Defined.
 
 
 
@@ -2616,7 +2616,7 @@ Proof.
         right.
         repeat rewrite (word_length_s _ _).
         reflexivity.
-Qed.
+Defined.
 
 
 
@@ -2640,7 +2640,7 @@ Proof.
       induction e.
       apply f_equal.
       exact redxs.
-Qed.
+Defined.
 
 
 
@@ -2669,7 +2669,7 @@ Proof.
         discriminate e.
         inversion e.
         exact (IHn0 H0).
-Qed.
+Defined.
 
 
 
@@ -2692,7 +2692,7 @@ Proof.
       exact (extend_normalized ninv norm).
     + rewrite (simpl_reduce1_on_inv inv).
       exact cnorm.
-Qed.
+Defined.
 
 
 
@@ -2709,7 +2709,7 @@ Proof.
     fold (@reduce n m).
     rewrite (reduce1_normal_is_id nxs).
     exact IHm.
-Qed.
+Defined.
 
 
 
@@ -2780,7 +2780,7 @@ Proof.
           exact inv.
           rewrite (simpl_reduce1_on_inv H).
           exact eqv.
-Qed.
+Defined.
 
 
 
@@ -2803,7 +2803,7 @@ Proof.
     fold (@reduce n m).
     set (eqv' := reduce1_well_def eqv).
     exact (IHm _ _ eqv').
-Qed.
+Defined.
 
 
 
@@ -2856,7 +2856,7 @@ Proof.
             split.
             exact (unique_inverse_gen (is_inverse_gen_swap inv2) inv1).
             exact (refl _).
-Qed.
+Defined.
 
 
 Lemma children_are_really_normal {n : nat}
@@ -2896,7 +2896,7 @@ Proof.
         -- repeat fold (@fcon n) in *.
           set (pass := @pass_reduce n m (fcon g1 xs) g0).
           exact (normalized_respects_strong_free_equiv (sym pass) ext).
-Qed.
+Defined.
 
 
 
@@ -2944,7 +2944,7 @@ Proof.
           rewrite (reduce_normal_is_id m H).
           exact H.
         -- exact (children_are_really_normal m g0 _ norm).
-Qed.
+Defined.
 
 
 
@@ -2965,7 +2965,7 @@ Proof.
     set (e' := le_S _ _ (le_S _ _ e)).
     rewrite <- r in e'.
     exact e'.
-Qed.
+Defined.
 
 
 
@@ -3031,111 +3031,7 @@ Proof.
               set (intro_lt (eq_refl (S (word_length g1)))).
               set (lt_trans l0 l).
               exact (none_less_than_itself l1).
-Qed.
-
-
-
-(*
-Definition normalizable_compute {n : nat} (g : FreeGroup n)
-
-  : {m : nat & normalized (reduce m g)}
-
-:=
-  let base :=
-        existT 
-          (fun m => normalized (reduce m fid))
-          0 
-          I
-  in
-
-  let step := 
-        fun (g : Generators n) (xs : FreeGroup n) (hyp : {m : nat & normalized (reduce m xs)}) =>
-          let m    := projT1 hyp in
-          let norm := projT2 hyp in
-
-            existT 
-              (fun k => normalized (reduce k (fcon g xs)))
-              (S m)
-              @(match xs with
-                | free_id  _       => 
-                    fun (eq_xs : xs = free_id n) =>
-                      let norm_sng := singleton_is_normalized g in
-                      let red      := reduce_normal_is_id (S m) norm_sng in
-
-                        eq_ind
-                          (free_id n)
-                          (fun xs' => normalized (reduce (S m) (fcon g xs')))
-                          (eq_ind _ _ norm_sng _ (eq_sym red))
-                          (xs)
-                          (eq_sym eq_xs)
-
-                | free_con _ g' ys => 
-                    fun (eq_xs : xs = free_con n g' ys) =>
-                      let inv_dec := is_inverse_gen_is_decidable g g' in
-                      let norm'   := eq_ind _ (fun xs' => normalized (reduce m xs')) norm _ eq_xs in
-
-                        eq_ind 
-                          (free_con n g' ys)
-                          (fun xs' => normalized (reduce (S m) (fcon g xs')))
-
-                          (match inv_dec with
-                            | or_introl ninv =>
-                                let zs := reduce m (fcon g' ys) in
-
-                                  normalized_respects_strong_free_equiv (sym $ pass_reduce m ys) $
-                                    (match zs with
-                                    | free_id _ => 
-                                        fun (eq_zs : reduce m (fcon g' ys) = free_id n) =>
-                                          let norm_sng := singleton_is_normalized g in
-                                          let red      := reduce1_normal_is_id norm_sng in
-
-                                            eq_ind 
-                                              fid 
-                                              (fun zs' => normalized (reduce1 (fcon g zs'))) 
-                                              (eq_ind _ _ norm_sng _ (eq_sym red))
-                                              (reduce m (fcon g' ys)) 
-                                              (eq_sym eq_zs)
-
-                                    | free_con _ h hs => 
-                                        fun (eq_zs : reduce m (fcon g' ys) = free_con n h hs) => 
-                                          let norm''   := eq_ind _ (fun zs' => normalized zs') norm' _ eq_zs in
-                                          let inv_dec' := is_inverse_gen_is_decidable g h in
-                                            match inv_dec' with
-                                            | or_introl ninv' =>
-                                                  eq_ind 
-                                                    (free_con n h hs)
-                                                    (fun zs' => normalized (reduce1 (fcon g zs')))
-                                                    (let pass := pass_reduce1 hs ninv' in
-                                                     let red  := reduce1_normal_is_id norm'' in 
-                                                        eq_ind 
-                                                          _
-                                                          (fun ps => normalized ps)
-                                                          (eq_ind 
-                                                            _
-                                                            (fun qs => normalized (fcon g qs))
-                                                            (extend_normalized ninv' norm'')
-                                                            _
-                                                            (eq_sym red))
-                                                          _
-                                                          (eq_sym pass))
-                                                    zs
-                                                    (eq_sym eq_zs)
-
-
-                                            | or_intror inv'  => _
-                                            end
-                                    end) eq_refl
-
-                            | or_intror inv  => _
-                            end)
-
-                            xs
-                            (eq_sym eq_xs)
-                end) eq_refl
-
-  in
-    FreeGroup_rect n (fun h => {m : nat & normalized (reduce m h)}) base step g.
-*)
+Defined.
 
 
 
@@ -3155,7 +3051,7 @@ Corollary normal_is_normalized {n : nat}
 Proof.
   intro g; unfold normalize.
   exact (normalizable_via_length _).
-Qed.
+Defined.
 
 
 
@@ -3167,7 +3063,7 @@ Proof.
   intros g norm.
   unfold normalize; simpl.
   exact (reduce_normal_is_id _ norm).
-Qed.
+Defined.
 
 
 Definition free_equiv {n : nat}
@@ -3188,7 +3084,7 @@ Proof.
   intro g.
   unfold free_equiv.
   exact (refl _).
-Qed.
+Defined.
 
 
 
@@ -3200,7 +3096,7 @@ Proof.
   intros g h eqv.
   unfold free_equiv in *.
   exact (sym eqv).
-Qed.
+Defined.
 
 
 
@@ -3212,7 +3108,7 @@ Proof.
   intros g h k e1 e2.
   unfold free_equiv in *.
   exact (trans e1 e2).
-Qed.
+Defined.
 
 
 
@@ -3288,7 +3184,7 @@ Proof.
       unfold F, free_equiv in fe.
       destruct (@free_con_respects_strong_free_equiv n g g' (normalize (fcon g0 w)) (normalize (fcon g1 w')) ge) as (f & _).
       exact (reduce1_well_def $ f fe).
-Qed.
+Defined.
 
 
 
@@ -3311,7 +3207,7 @@ Lemma free_mult_left_id {n : nat}
 
 Proof.
   intro g; simpl. exact (free_equiv_refl g).
-Qed.
+Defined.
 
 
 
@@ -3326,7 +3222,7 @@ Proof.
   - simpl.
     unfold app.
     exact (free_con_well_def_on_free_equiv (refl g) IHg).
-Qed.
+Defined.
 
 
 
